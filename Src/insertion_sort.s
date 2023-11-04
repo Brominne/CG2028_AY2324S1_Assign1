@@ -31,14 +31,15 @@
 @ Global var: R4: address of arr[j], R5 j,
 @ R6: temp, R7: Swap, R8: i, R9: address of arr[i]
 @ R10: n
+
+@R0: arr[0], R1: M
 insertion_sort:
-	PUSH {R14}
-
-	LDR R14 ,=0
+	@PUSH {R14}
+	PUSH {R4, R5, R6, R7, R8, R9, R10}
+	MOV R7 ,#0 @ number of swaps
+	MOV R9, R0  @ address of arr[i] = address of arr[0]
+	MOV R10, R1 @ set n = 6
 	B Outter
-
-	POP {R14}
-
 
 Outter:
 	CMP R8, R10 @ i==n, quit otter loop
@@ -55,17 +56,17 @@ Outter:
 Inner:
 
 	CMP R5, #0 @ inner loop finish, j = 0
-	BEQ Outter @ after finish go to outter loop
+	BEQ Inner_finish @ after finish go to outter loop
 
 	LDR R2, [R4, #-4]  @ R2: arr[j-1]
 	CMP R2, R6 @arr[j-1] < temp, inner loop finish
-	BMI Outter @ after finish go to outter loop
+	BMI Inner_finish @ after finish go to outter loop
 
 	STR R2, [R4], #-4  @ arr[j] = arr[j-1], move [R4] so [R4] = arr[j-1]
 	SUB R5, #-1 @j--
 	ADD R7, #1 @swap++
 
-	B Inner_finish
+	B Inner
 
 Inner_finish:
 
@@ -74,6 +75,9 @@ Inner_finish:
 
 post_loop:
 
+	MOV R0, R7
+	@POP {R14}
+	POP {R4, R5, R6, R7, R8, R9, R10}
 	BX LR
 
 
