@@ -60,7 +60,7 @@ Inner:
 
 	LDR R2,[R4, #-4]  @ R2: arr[j-1]
 	CMP R2,R6 @arr[j-1] < temp, inner loop finish
-	BMI Inner_finish @ after finish go to outter loop
+	BLS Inner_finish @ after finish go to outter loop
 
 	STR R2,[R4],#-4  @ arr[j] = arr[j-1], move [R4] so [R4] = arr[j-1]
 	SUB R5,#1 @j--
