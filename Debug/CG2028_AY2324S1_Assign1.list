@@ -27,11 +27,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  11 .ARM.attributes 00000030  00000000  00000000  000201d8  2**0
                   CONTENTS, READONLY
- 12 .debug_line   00000ba8  00000000  00000000  00020208  2**0
+ 12 .debug_line   00000ba6  00000000  00000000  00020208  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_info   000003b5  00000000  00000000  00020db0  2**0
+ 13 .debug_info   000003b5  00000000  00000000  00020dae  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_abbrev 00000209  00000000  00000000  00021165  2**0
+ 14 .debug_abbrev 00000209  00000000  00000000  00021163  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  15 .debug_aranges 00000098  00000000  00000000  00021370  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
@@ -81,101 +81,93 @@ Disassembly of section .text:
  80001cc:	08003f2c 	.word	0x08003f2c
 
 080001d0 <insertion_sort>:
-@ R10: n
+@ R9: Address of arr[i]
 
-@R0: arr[0], R1: M
+@ write your program from here:
+
 insertion_sort:
-	@PUSH {R14}
-	PUSH {R4, R5, R6, R7, R8, R9, R10}
- 80001d0:	e92d 07f0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, sl}
-	MOV R7 ,#0 @ number of swaps
+	PUSH {R4-R11} @ push all registers onto stacks
+ 80001d0:	e92d 0ff0 	stmdb	sp!, {r4, r5, r6, r7, r8, r9, sl, fp}
+	MOV R7,#0  @ initialize swap = 0
  80001d4:	f04f 0700 	mov.w	r7, #0
-	MOV R9, R0  @ address of arr[i] = address of arr[0]
+	MOV R9,R0  @ address of arr[i] = address of arr[0]
  80001d8:	4681      	mov	r9, r0
-	MOV R10, R1 @ set n = 6
- 80001da:	468a      	mov	sl, r1
 	B Outter
- 80001dc:	e7ff      	b.n	80001de <Outter>
+ 80001da:	e7ff      	b.n	80001dc <Outter>
 
-080001de <Outter>:
+080001dc <Outter>:
 
 Outter:
-	CMP R8, R10 @ i==n, quit otter loop
- 80001de:	45d0      	cmp	r8, sl
+	CMP R8,R1 @ i==n, quit outter loop
+ 80001dc:	4588      	cmp	r8, r1
 	BEQ post_loop
- 80001e0:	d017      	beq.n	8000212 <post_loop>
+ 80001de:	d015      	beq.n	800020c <post_loop>
 
-	LDR R6, [R9] @use R9 as a[i], temp = arr[ i ];
- 80001e2:	f8d9 6000 	ldr.w	r6, [r9]
-	MOV R5, R8 @ j = i
+	MOV R4,R9 @ address of arr[i] -> address of arr[j]
+ 80001e0:	464c      	mov	r4, r9
+	LDR R6,[R9],#4 @ temp = arr[i], i++;
+ 80001e2:	f859 6b04 	ldr.w	r6, [r9], #4
+	MOV R5,R8 @ j = i
  80001e6:	4645      	mov	r5, r8
-	MOV R4, R9 @ address of arr[i] -> address of arr[j]
- 80001e8:	464c      	mov	r4, r9
-	ADD R8, #1
- 80001ea:	f108 0801 	add.w	r8, r8, #1
-	ADD R9, #4
- 80001ee:	f109 0904 	add.w	r9, r9, #4
+	ADD R8,#1
+ 80001e8:	f108 0801 	add.w	r8, r8, #1
 
 	B Inner
- 80001f2:	e7ff      	b.n	80001f4 <Inner>
+ 80001ec:	e7ff      	b.n	80001ee <Inner>
 
-080001f4 <Inner>:
+080001ee <Inner>:
 
 Inner:
 
-	CMP R5, #0 @ inner loop finish, j = 0
- 80001f4:	2d00      	cmp	r5, #0
+	CMP R5,#0 @ inner loop finish, j = 0
+ 80001ee:	2d00      	cmp	r5, #0
 	BEQ Inner_finish @ after finish go to outter loop
- 80001f6:	d00a      	beq.n	800020e <Inner_finish>
+ 80001f0:	d00a      	beq.n	8000208 <Inner_finish>
 
-	LDR R2, [R4, #-4]  @ R2: arr[j-1]
- 80001f8:	f854 2c04 	ldr.w	r2, [r4, #-4]
-	CMP R2, R6 @arr[j-1] < temp, inner loop finish
- 80001fc:	42b2      	cmp	r2, r6
+	LDR R2,[R4, #-4]  @ R2: arr[j-1]
+ 80001f2:	f854 2c04 	ldr.w	r2, [r4, #-4]
+	CMP R2,R6 @arr[j-1] < temp, inner loop finish
+ 80001f6:	42b2      	cmp	r2, r6
 	BMI Inner_finish @ after finish go to outter loop
- 80001fe:	d406      	bmi.n	800020e <Inner_finish>
+ 80001f8:	d406      	bmi.n	8000208 <Inner_finish>
 
-	STR R2, [R4], #-4  @ arr[j] = arr[j-1], move [R4] so [R4] = arr[j-1]
- 8000200:	f844 2904 	str.w	r2, [r4], #-4
-	SUB R5, #-1 @j--
- 8000204:	f1a5 35ff 	sub.w	r5, r5, #4294967295
-	ADD R7, #1 @swap++
- 8000208:	f107 0701 	add.w	r7, r7, #1
+	STR R2,[R4],#-4  @ arr[j] = arr[j-1], move [R4] so [R4] = arr[j-1]
+ 80001fa:	f844 2904 	str.w	r2, [r4], #-4
+	SUB R5,#1 @j--
+ 80001fe:	f1a5 0501 	sub.w	r5, r5, #1
+	ADD R7,#1 @swap++
+ 8000202:	f107 0701 	add.w	r7, r7, #1
 
 	B Inner
- 800020c:	e7f2      	b.n	80001f4 <Inner>
+ 8000206:	e7f2      	b.n	80001ee <Inner>
 
-0800020e <Inner_finish>:
+08000208 <Inner_finish>:
 
 Inner_finish:
 
-	STR R6, [R4] @ arr[j] = temp
- 800020e:	6026      	str	r6, [r4, #0]
+	STR R6,[R4] @ arr[j] = temp
+ 8000208:	6026      	str	r6, [r4, #0]
 	B Outter
- 8000210:	e7e5      	b.n	80001de <Outter>
+ 800020a:	e7e7      	b.n	80001dc <Outter>
 
-08000212 <post_loop>:
+0800020c <post_loop>:
 
 post_loop:
-
 	MOV R0, R7
- 8000212:	4638      	mov	r0, r7
-	@POP {R14}
-	POP {R4, R5, R6, R7, R8, R9, R10}
- 8000214:	e8bd 07f0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl}
+ 800020c:	4638      	mov	r0, r7
+	POP {R4-R11}
+ 800020e:	e8bd 0ff0 	ldmia.w	sp!, {r4, r5, r6, r7, r8, r9, sl, fp}
 	BX LR
- 8000218:	4770      	bx	lr
+ 8000212:	4770      	bx	lr
 
-0800021a <strlen>:
- 800021a:	4603      	mov	r3, r0
- 800021c:	f813 2b01 	ldrb.w	r2, [r3], #1
- 8000220:	2a00      	cmp	r2, #0
- 8000222:	d1fb      	bne.n	800021c <strlen+0x2>
- 8000224:	1a18      	subs	r0, r3, r0
- 8000226:	3801      	subs	r0, #1
- 8000228:	4770      	bx	lr
- 800022a:	0000      	movs	r0, r0
- 800022c:	0000      	movs	r0, r0
+08000214 <strlen>:
+ 8000214:	4603      	mov	r3, r0
+ 8000216:	f813 2b01 	ldrb.w	r2, [r3], #1
+ 800021a:	2a00      	cmp	r2, #0
+ 800021c:	d1fb      	bne.n	8000216 <strlen+0x2>
+ 800021e:	1a18      	subs	r0, r3, r0
+ 8000220:	3801      	subs	r0, #1
+ 8000222:	4770      	bx	lr
 	...
 
 08000230 <memchr>:
@@ -1783,7 +1775,7 @@ Infinite_Loop:
  800110a:	bf48      	it	mi
  800110c:	f044 0408 	orrmi.w	r4, r4, #8
  8001110:	9700      	str	r7, [sp, #0]
- 8001112:	f7ff f882 	bl	800021a <strlen>
+ 8001112:	f7ff f87f 	bl	8000214 <strlen>
  8001116:	e9cd 4001 	strd	r4, r0, [sp, #4]
  800111a:	2401      	movs	r4, #1
  800111c:	4620      	mov	r0, r4
@@ -2570,7 +2562,7 @@ Infinite_Loop:
  8001842:	f001 fcbd 	bl	80031c0 <_localeconv_r>
  8001846:	f8d0 a000 	ldr.w	sl, [r0]
  800184a:	4650      	mov	r0, sl
- 800184c:	f7fe fce5 	bl	800021a <strlen>
+ 800184c:	f7fe fce2 	bl	8000214 <strlen>
  8001850:	2300      	movs	r3, #0
  8001852:	930a      	str	r3, [sp, #40]	; 0x28
  8001854:	6823      	ldr	r3, [r4, #0]
