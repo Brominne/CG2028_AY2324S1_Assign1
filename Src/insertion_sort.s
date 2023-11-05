@@ -40,37 +40,36 @@ insertion_sort:
 	PUSH {R4-R11} @ push all registers onto stacks
 	MOV R7,#0  @ initialize swap = 0
 	MOV R9,R0  @ address of arr[i] = address of arr[0]
-	B Outter
 
 Outter:
 	CMP R8,R1 @ i==n, quit outter loop
 	BEQ post_loop
 
-	MOV R4,R9 @ address of arr[i] -> address of arr[j]
-	LDR R6,[R9],#4 @ temp = arr[i], i++;
-	MOV R5,R8 @ j = i
-	ADD R8,#1
-
-	B Inner
+	@MOV R4,R9 @ address of arr[i] -> address of arr[j]
+	LDR R6,[R9] @ temp = arr[i]
+	@MOV R5,R8 @ j = i
+	PUSH {R8, R9}
 
 Inner:
 
-	CMP R5,#0 @ inner loop finish, j = 0
+	CMP R8,#0 @ inner loop finish, j = 0
 	BEQ Inner_finish @ after finish go to outter loop
 
-	LDR R2,[R4, #-4]  @ R2: arr[j-1]
+	LDR R2,[R9, #-4]  @ R2: arr[j-1]
 	CMP R2,R6 @arr[j-1] < temp, inner loop finish
 	BLS Inner_finish @ after finish go to outter loop
 
-	STR R2,[R4],#-4  @ arr[j] = arr[j-1], move [R4] so [R4] = arr[j-1]
-	SUB R5,#1 @j--
+	STR R2,[R9],#-4  @ arr[j] = arr[j-1], move [R9] so [R9] = arr[j-1]
+	SUB R8,#1 @j--
 	ADD R7,#1 @swap++
 
 	B Inner
 
 Inner_finish:
-
-	STR R6,[R4] @ arr[j] = temp
+	STR R6,[R9] @ arr[j] = temp
+	POP {R8, R9}
+	ADD R9,#4 @ select next entry in array
+	ADD R8,#1 @ add loop counter
 	B Outter
 
 post_loop:
